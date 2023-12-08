@@ -119,3 +119,10 @@
     stroke-dashoffset: 2.118270261325792;
   }
 }
+
+.myLineBackground {
+  background-color: aquamarine;
+  border: 1px solid aquamarine;
+  border-radius: 0.5rem;
+  /* box-shadow: 0 0 0 1px black; */
+}

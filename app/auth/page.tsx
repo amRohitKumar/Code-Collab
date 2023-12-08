@@ -3,13 +3,17 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
+import clsx from "clsx";
 import { ErrorMessage } from "@hookform/error-message";
+import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 
 import { Input } from "@/components/ui/input";
 import { AuthSocialGroup } from "@/components/SocialIcons";
 import { Button } from "@/components/ui/button";
 import { FormErrorMessage } from "@/components/FormErrorMessage";
-import clsx from "clsx";
+import customFetch from "@/utils/axios";
+import { sign } from "crypto";
 
 type VariantType = "LOGIN" | "REGISTER";
 
@@ -34,8 +38,18 @@ const Auth = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    try {
+      if (variant === "LOGIN") {
+        await signIn("credentials", { ...data, callbackUrl: "/dashboard" });
+      } else {
+        await customFetch.post("/auth/register", data);
+        await signIn("credentials", { ...data, callbackUrl: "/dashboard" });
+      }
+    } catch (error: any) {
+      console.log("LOGIN ERROR = ", error);
+      toast.error(error?.message || "Something went wrong !");
+    }
   };
 
   return (
