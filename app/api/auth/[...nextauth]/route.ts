@@ -1,10 +1,10 @@
 import customFetch from "@/utils/axios";
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { AuthOptions, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth",
   },
@@ -29,6 +29,7 @@ const handler = NextAuth({
             throw new Error("Invalid credentials");
           }
           const res = await customFetch.post("/auth/login", credentials);
+          // console.log("backend response =>", res.data);
           return res.data;
         } catch (err: any) {
           console.log("LOGIN ERROR", err?.data?.message);
@@ -42,17 +43,33 @@ const handler = NextAuth({
     maxAge: 10 * 24 * 60 * 60, // 10 days
   },
   callbacks: {
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, session, user, trigger }) => {
       // this token will then be stored in cookes and passed to the session callback
-      return { ...token, ...user };
+      // console.log("user incoming =>", user);
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.express_token = user.token;
+      }
+      if (trigger === "update") {
+        // console.log("jwt callback = ", session);
+        token.room_token = session?.room_token;
+      }
+      return token;
     },
     session: async ({ session, token }) => {
       if (token) {
-        session.user = token as any;
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.express_token = token.express_token;
+        session.user.room_token = token.room_token;
       }
       return session;
     },
   },
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { InputWithLabel } from "../InputWithLabel";
 import { Button } from "../ui/button";
-import { FaRegShareSquare } from "react-icons/fa";
+import { AiOutlineLink } from "react-icons/ai";
 
 type CodeBoxDetailType = {
   id: number;
@@ -35,8 +35,8 @@ const ShareRoom: React.FC<ShareRoomProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button>
-          <FaRegShareSquare size="2em" />
+        <button className="ml-2 opacity-50">
+          <AiOutlineLink size="1.75em" />
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

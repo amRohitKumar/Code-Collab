@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import AuthContext from "@/context/AuthContext";
 import ToasterContext from "@/context/ToasterContext";
+import NextTopLoader from "nextjs-toploader";
+import { ModalProvider } from "@/providers/modalProviders";
 import "./globals.css";
+import { ThemeProvider } from "@/providers/themeProvider";
 
 export const metadata: Metadata = {
   title: "CodeCollab",
@@ -18,8 +21,17 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthContext>
-          <ToasterContext />
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            storageKey="code-collab"
+          >
+            <ToasterContext />
+            <NextTopLoader showSpinner={false} crawl={false} />
+            <ModalProvider />
+            {children}
+          </ThemeProvider>
         </AuthContext>
       </body>
     </html>

@@ -11,7 +11,7 @@ const customFetch = () => {
 
   axiosInstance.interceptors.request.use(async (config) => {
     const data = await getSession();
-    const token = data?.user?.token;
+    const token = data?.user?.express_token;
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }

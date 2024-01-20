@@ -13,7 +13,6 @@ import { AuthSocialGroup } from "@/components/SocialIcons";
 import { Button } from "@/components/ui/button";
 import { FormErrorMessage } from "@/components/FormErrorMessage";
 import customFetch from "@/utils/axios";
-import { sign } from "crypto";
 
 type VariantType = "LOGIN" | "REGISTER";
 
@@ -53,15 +52,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative">
-      <Image
+    <div className="main flex flex-col items-center justify-center min-h-screen relative">
+      <div className="gradient" />
+      {/* <Image
         src="/blob-scene-haikei.svg"
         alt="Background"
         layout="fill"
         objectFit="cover"
-        className="absolute inset-0 -z-10"
-      />
-      <div className="w-11/12 sm:w-7/12 xl:w-2/5 px-6 py-10 border-slate-200 border-2 rounded-3xl bg-slate-100 bg-opacity-40 glassMorphism">
+        className="absolute inset-0 -z-10 opacity-30"
+      /> */}
+      <div className="w-11/12 sm:w-7/12 xl:w-2/5 px-6 py-10 border-slate-200 border-2 rounded-3xl bg-slate-100 z-10  glassMorphism">
         <h3 className="text-5xl font-semibold text-center ">
           Login to Your Account
         </h3>
@@ -73,7 +73,7 @@ const Auth = () => {
         {/* -----OR------------ */}
         <div className="relative flex justify-center mt-2">
           <div className="border-[1px] border-gray-200 absolute w-full top-1/2"></div>
-          <span className="z-10 relative bg-white px-2 text-gray-500">
+          <span className="z-10 relative bg-slate-100 px-2 text-gray-500">
             Or continue with
           </span>
         </div>
