@@ -26,7 +26,7 @@ const Dashboard = async () => {
   console.log(data);
   const { id: userId, express_token } = data.user;
   const allCodeboxes: models.ICodeBox[] = await getData(userId, express_token);
-  console.dir(allCodeboxes, {depth: null});
+  // console.dir(allCodeboxes, {depth: null});
   return (
     <div className="flex flex-col px-4 md:px-6 lg:px-12 py-4 md:py-8">
       <h1 className="text-4xl font-bold text-left mb-4 md:mb-8">
