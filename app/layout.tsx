@@ -23,7 +23,7 @@ export default function RootLayout({
         <AuthContext>
           <ThemeProvider
             attribute="class"
-            defaultTheme="light"
+            defaultTheme="dark"
             enableSystem={false}
             storageKey="code-collab"
           >

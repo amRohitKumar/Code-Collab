@@ -8,15 +8,15 @@ const FeatureBox: React.FC<Props> = ({ className }) => {
   return (
     <div
       className={cn(
-        "flex flex-col md:flex-row w-full lg:w-3/4 p-8 mb-12",
+        "flex flex-col md:flex-row w-full lg:w-3/4 p-8 mb-12 ",
         className
       )}
     >
       <div className="md:w-1/2">
-        <h1 className="mt-2 text-4xl font-bold sm:text-4xl text-black">
+        <h1 className="mt-2 text-4xl font-bold sm:text-4xl text-black dark:text-slate-200">
           Collaboration & Code
         </h1>
-        <p className="mt-3 text-xl text-gray-600 sm:text-lg text-justify tracking-tight">
+        <p className="mt-3 text-xl text-gray-600 sm:text-lg text-justify tracking-tight dark:text-violet-400">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
           dolores ad iusto. Eveniet quam numquam non excepturi animi,
           architecto, maiores doloremque cupiditate labore autem nisi, cumque

@@ -1,6 +1,6 @@
 "use client";
 
-import { Ref, RefAttributes, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import toast from "react-hot-toast";
@@ -21,6 +21,7 @@ import {
 import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
 import EditorTabs from "@/components/CodeBoxPage/EditorTabs";
 import { ImperativePanelHandle } from "react-resizable-panels";
+import sortByFileConvention from "@/utils/customFileSorting";
 
 // audio call
 
@@ -59,8 +60,6 @@ interface ICursroEventWithUser
 }
 
 const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
-  const { data, update } = useSession();
-  // console.log(data);
   const router = useRouter();
   // const { id: userId, name, email, room_token, token } = data?.user || {};
   const [currFile, setFile] = useState<models.ICodeFile | null>(null);
@@ -91,22 +90,31 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   // TO FETCH CODEBOX DATA INITIALLY
   const fetchCodeBoxData = async () => {
     try {
-      const { codeBox, codeFiles } = (
+      const {
+        codeBox,
+        codeFiles,
+      }: { codeBox: models.ICodeBox; codeFiles: models.ICodeFile[] } = (
         await customFetch.get(`/codebox/${codeBoxId}`)
       ).data;
-      // console.log("code file detail = ", codeFiles);
+      // console.log("code file fetched = ", codeFiles);
+      codeFiles.sort((fileA, fileB) =>
+        sortByFileConvention(fileA.language, fileB.language)
+      );
       setCodeboxDetail(codeBox);
       setCodefileDetail(codeFiles);
       setFile(codeFiles[0]);
-      console.log("func = ", codeFiles);
+      // console.log("func = ", codeFiles);
       codeFiles.forEach((file: models.ICodeFile) => {
         monacorRef.current?.editor.createModel(
-          file.code,
+          file.code || "",
           file.language,
           monaco.Uri.parse(file.language)
         );
       });
-      debouncedUpdateView();
+
+      setDocString(
+        getDocument(codeFiles[0].code, codeFiles[1].code, codeFiles[2].code)
+      );
     } catch (error: any) {
       console.log("error while fethcing codebox info = ", error);
       toast.error(
@@ -119,7 +127,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   // TO JOIN CODEBOX ROOM INITIALLY
   const joinCodeBoxRoom = async () => {
     const session = await getSession();
-    console.log(session);
+    // console.log(session);
     const {
       id: userId,
       name,
@@ -160,7 +168,15 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       toast.error("Failed to copy !");
     }
   };
-
+  const getDocument = (html?: string, css?: string, js?: string) => {
+    return `
+    <html>
+      <body>${html}</body>
+      <style>${css}</style>
+      <script>${js}</script>
+    </html>
+  `;
+  };
   const getHTMLString = () => {
     const allModels = monacorRef.current?.editor.getModels();
     const htmlcontent = allModels
@@ -172,14 +188,8 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     const jscontent = allModels
       ?.find((model) => model.uri.path === monaco.Uri.parse("JavaScript").path)
       ?.getValue();
-    const outputDoc = `
-      <html>
-        <body>${htmlcontent}</body>
-        <style>${csscontent}</style>
-        <script>${jscontent}</script>
-      </html>
-    `;
-    setDocString(outputDoc);
+
+    setDocString(getDocument(htmlcontent, csscontent, jscontent));
   };
 
   const debouncedUpdateView = debounce(getHTMLString, 3000);
@@ -192,7 +202,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     // console.log("mounted = ", editorRef.current);
     monacorRef.current = monaco;
     await fetchCodeBoxData();
-    console.log("updated = ", currFile);
+    // console.log("updated = ", currFile);
   }
 
   useEffect(() => {
@@ -226,7 +236,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
 
   const changeActiveFile = (fileLanguage: string) => {
     const res = codefileDetail.find((file) => file.language === fileLanguage);
-    console.log("changing active file to = ", res);
+    // console.log("changing active file to = ", res);
     setFile(res!);
   };
 
@@ -290,7 +300,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
 
   function changeSeleciton(e: ICursroEventWithUser) {
     var selectionArray = [];
-    console.log("curr file", currFile);
+    // console.log("curr file", currFile);
     // console.log("changing selection = ", e.fileId, currFile?.language);
     if (
       e.selection.startColumn == e.selection.endColumn &&
@@ -337,7 +347,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   }
   function changeWidgetPosition(e: ICursroEventWithUser) {
     if (!editorRef.current) return;
-    console.log("cursor change = ", e.fileId, currFile?.language);
+    // console.log("cursor change = ", e.fileId, currFile?.language);
     // remove previous widget
     editorRef.current.removeContentWidget(contentWidgets.current[e.userId]);
 
@@ -381,7 +391,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     });
 
     socket.on("code-change-received", ({ changeEvent, fileId }) => {
-      console.log("code change received hook called", changeEvent, fileId);
+      // console.log("code change received hook called", changeEvent, fileId);
 
       // execute change event
       // setModel(fileId);
@@ -400,7 +410,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       //     monaco.Uri.parse(codeFile?.id!)
       //   );
       // }
-      console.log("req model = ", reqModel);
+      // console.log("req model = ", reqModel);
       isSocket.current = true;
       reqModel?.applyEdits([
         {
@@ -416,13 +426,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       //     forceMoveMarkers: true,
       //   },
       // ]);
-    });
-
-    socket.on("change-language", (newLanguage: string) => {
-      console.log("change language hook called", newLanguage);
-
-      // change language of editor
-      // handleModelLanguageChange(newLanguage);
     });
 
     socket.on("user-disconnected", (userId: number) => {
@@ -450,7 +453,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       socket.off("code-change-received");
       socket.off("user-disconnected");
       socket.off("selection");
-      socket.off("change-language");
       socket.off("connect_error");
       socket.disconnect();
 
@@ -464,6 +466,11 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
         document.getElementById(`user${user.userId}`)?.remove();
       });
 
+      // destroy monaco models
+      monacorRef.current?.editor
+        .getModels()
+        .forEach((model) => model.dispose());
+      editorRef.current?.dispose();
       // reset room_token
       // update({
       //   ...data,
@@ -473,7 +480,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       //   },
       // });
     };
-  }, [codeboxDetail?.roomId]);
+  }, []);
 
   const editorSidebarRef = useRef();
   const resizeEditorSidebar = (finalWidth: number) => {
