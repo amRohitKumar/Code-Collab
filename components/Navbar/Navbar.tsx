@@ -13,7 +13,7 @@ const Navbar = () => {
   const { onOpen } = useModal();
 
   return (
-    <nav className="flex px-4 py-0 bg-secondary/90 sticky top-0 justify-between h-[60px] backdrop-blur-sm z-10">
+    <nav className="flex px-4 py-0 bg-secondary/90 sticky top-0 justify-between h-[60px] backdrop-blur-sm z-10 border-b-[1px] border-zinc-200 shadow-sm">
       {/* LEFT SIDE OPTIONS */}
       <div className="flex items-center gap-2">
         <Image

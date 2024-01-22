@@ -16,7 +16,7 @@ const ModifiedLink: React.FC<ModifiedLinkTypes> = ({
   if (currPath === href) return null;
   return (
     <Link href={href} {...otherProps} className="">
-      <Button size="sm">{children}</Button>
+      <Button size="sm" variant="outline">{children}</Button>
     </Link>
   );
 };

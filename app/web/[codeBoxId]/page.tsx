@@ -560,7 +560,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
           <iframe
             title={codeboxDetail?.name || "Output"}
             sandbox="allow-scripts"
-            className="w-full h-full"
+            className="w-full h-full black:bg-white"
             srcDoc={docString}
           />
         </div>
