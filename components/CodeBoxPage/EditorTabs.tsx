@@ -22,11 +22,10 @@ const EditorTabs = ({
   activeFileId,
 }: EditorTabProps) => {
   return (
-    <div className="h-[40px] bg-[#202124] border-b-2 border-slate-500 border-solid pt-1 flex items-end relative">
+    <div className="h-[40px] dark:bg-[#202124] border-b-2 border-slate-200 dark:border-slate-500 border-solid pt-1 flex items-end relative">
       {codeFiles.map((files, idx) => (
-        <div className="w-full flex items-end h-full">
+        <div key={files.id} className="w-full flex items-end h-full">
           <Tab
-            key={files.id}
             name={files.language}
             handleClick={handleClick}
             fileId={files.id}

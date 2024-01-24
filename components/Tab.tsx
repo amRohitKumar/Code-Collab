@@ -25,23 +25,23 @@ const Tab = ({
     >
       <div
         className={cn(
-          "absolute h-1/2 w-full bottom-0 bg-[#202124]",
-          fileId === activeFileId && "bg-[#323639]"
+          "absolute h-1/2 w-full bottom-0 dark:bg-[#202124]",
+          fileId === activeFileId && "bg-slate-300 dark:bg-[#323639]"
         )}
       />
       <div className="w-full h-full flex">
-        <div className="w-[5%] rounded-br-lg z-10 bg-[#202124]" />
+        <div className="w-[5%] rounded-br-lg z-10 dark:bg-[#202124] bg-slate-200" />
         <div
           className={cn(
             `text-[${getLanguageColor(
               name
-            )}]/80 px-4 font-bold tracking-widest border-0 rounded-md bg-[#202124] z-10 cursor-pointer hover:bg-[#323639] py-0.5 flex items-center text-sm w-full`,
-            fileId === activeFileId && "bg-[#323639]"
+            )}]/80 px-4 font-bold tracking-widest border-0 rounded-md dark:bg-[#202124] z-10 cursor-pointer hover:bg-slate-300 dark:hover:bg-[#323639] py-0.5 flex items-center text-sm w-full`,
+            fileId === activeFileId && "bg-slate-300 dark:bg-[#323639]"
           )}
         >
           {name}
         </div>
-        <div className="w-[5%] rounded-bl-lg z-10 bg-[#202124]" />
+        <div className="w-[5%] rounded-bl-lg z-10 dark:bg-[#202124] bg-slate-200" />
       </div>
     </div>
   );

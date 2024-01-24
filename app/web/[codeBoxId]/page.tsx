@@ -22,6 +22,7 @@ import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
 import EditorTabs from "@/components/CodeBoxPage/EditorTabs";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import sortByFileConvention from "@/utils/customFileSorting";
+import { useTheme } from "next-themes";
 
 // audio call
 
@@ -78,6 +79,8 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     null
   );
 
+  const { theme } = useTheme();
+
   // to store codefile detail
   const [codefileDetail, setCodefileDetail] = useState<models.ICodeFile[]>([]);
 
@@ -96,7 +99,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       }: { codeBox: models.ICodeBox; codeFiles: models.ICodeFile[] } = (
         await customFetch.get(`/codebox/${codeBoxId}`)
       ).data;
-      // console.log("code file fetched = ", codeFiles);
+      console.log("code file fetched = ", codeFiles);
       codeFiles.sort((fileA, fileB) =>
         sortByFileConvention(fileA.language, fileB.language)
       );
@@ -135,10 +138,10 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       room_token,
       express_token,
     } = session?.user || {};
-    // console.log("join codebox room hook called");
+    console.log("join codebox room hook called");
     try {
       if (codeboxDetail?.roomId) {
-        // console.log("codeboxid = ", codeBoxId);
+        console.log("codeboxid = ", codeBoxId);
         socket.auth = {
           boxId: codeBoxId,
           userId: userId,
@@ -363,6 +366,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   }
 
   useEffect(() => {
+    if (!codeboxDetail?.id || !editorRef.current) return;
     joinCodeBoxRoom();
     socket.on(
       "connected-users",
@@ -480,7 +484,8 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       //   },
       // });
     };
-  }, []);
+    // should be called after fetchCodeboxData function
+  }, [codeboxDetail?.id, editorRef.current]);
 
   const editorSidebarRef = useRef();
   const resizeEditorSidebar = (finalWidth: number) => {
@@ -516,10 +521,11 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
             <EditorSidebar
               connectedUsers={connectedUsers}
               handleSize={resizeEditorSidebar}
+              codeboxName={codeboxDetail?.name}
             />
           </ResizablePanel>
           <ResizablePanel className="">
-            <div className="flex h-content md:sticky bg-slate-500 w-full">
+            <div className="flex h-content md:sticky bg-slate-200 w-full">
               <div className="h-full w-full">
                 <EditorTabs
                   codeFiles={fileNames}
@@ -534,7 +540,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
                   defaultValue={currFile?.code || "// Loading ..."}
                   onMount={handleEditorDidMount}
                   onChange={handleEditorChange}
-                  theme="vs-dark"
+                  theme={theme === "dark" ? "vs-dark" : "light"}
                   path={currFile?.language}
                 />
               </div>
@@ -548,15 +554,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       />
       <ResizablePanel>
         <div className="w-full h-full">
-          {/* <div className="flex justify-center items-center">
-            <h4 className="text-3xl font-bold text-center">
-              {codeboxDetail?.name || "Loading ..."}
-            </h4>
-            <ShareRoom
-              codeboxDetail={codeboxDetail}
-              copyContent={copyContent}
-            />
-          </div> */}
           <iframe
             title={codeboxDetail?.name || "Output"}
             sandbox="allow-scripts"

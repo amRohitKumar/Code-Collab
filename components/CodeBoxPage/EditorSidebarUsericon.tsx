@@ -8,30 +8,15 @@ type PropsType = {
   className?: string;
 };
 
-const EditorSidebarUserIcon = ({
-  name,
-  color,
-  isOpen,
-  className,
-}: PropsType) => {
+const EditorSidebarUserIcon = ({ name, color, className }: PropsType) => {
   return (
-    <div
-      className={cn(
-        "flex shrink-0 w-full gap-3 items-center py-1 px-1 overflow-clip",
-        className
-      )}
-    >
-      <Avatar className="h-8 w-8 aspect-square">
+    <div className={cn("", className)}>
+      <Avatar className="h-7 w-7 aspect-square">
         {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
         <AvatarFallback className={`bg-[${color}] w-full `}>
           {name[0].toUpperCase()}
         </AvatarFallback>
       </Avatar>
-      {isOpen && (
-        <div>
-          <p className="text-slate-200 w-full text-xs">{name}</p>
-        </div>
-      )}
     </div>
   );
 };

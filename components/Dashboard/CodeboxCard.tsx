@@ -12,7 +12,7 @@ const CodeboxCard = ({
   return (
     <Link href={`/${type === "CODE" ? "code" : "web"}/${id}`} prefetch={false}>
       <div
-        className="flex justify-center flex-col bg-slate-100/80 hover:bg-slate-200/60 transition-all duration-75 border-2 border-border w-[250px] lg:w-[300px] max-w-[300px] rounded-md overflow-hidden hover:cursor-pointer my-5 group dark:bg-primary dark:hover:bg-primary/80"
+        className="flex justify-center flex-col bg-slate-100/80 hover:bg-slate-200/60 transition-all duration-75 w-[250px] lg:w-[300px] max-w-[300px] rounded-md overflow-hidden hover:cursor-pointer my-5 group dark:bg-primary dark:hover:bg-primary/80"
         // onClick={() =>
         //   router.push(`/${type === "CODE" ? "code" : "web"}/${id}`)
         // }
