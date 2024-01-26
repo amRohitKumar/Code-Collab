@@ -1,11 +1,10 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../api/auth/[...nextauth]/route";
 import CardGroup from "@/components/Dashboard/CardGroup";
 import axios from "axios";
+import serverAuth from "@/utils/auth";
 
-const getData = async (userId: number, token: string) => {
+const getData = async (userId: string, token: string) => {
   try {
     const { data } = await axios.get(
       `http://localhost:8000/dashboard/${userId}`,
@@ -17,16 +16,18 @@ const getData = async (userId: number, token: string) => {
       }
     );
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.log("error = ", error?.response?.data);
   }
 };
 
 const Dashboard = async () => {
-  const data = await getServerSession(authOptions);
-  console.log(data);
-  const { id: userId, express_token } = data.user;
-  const allCodeboxes: models.ICodeBox[] = await getData(userId, express_token);
+  const user = (await serverAuth())?.user;
+  // console.log(data);
+  const allCodeboxes: models.ICodeBox[] = await getData(
+    user?.id!,
+    user?.express_token!
+  );
   // console.dir(allCodeboxes, {depth: null});
   return (
     <div className="flex flex-col px-4 md:px-6 lg:px-12 py-4 md:py-8">
