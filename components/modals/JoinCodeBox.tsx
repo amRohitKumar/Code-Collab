@@ -54,7 +54,7 @@ const JoinCodeBoxModal = () => {
     } catch (error: any) {
       console.log("joining error = ", error);
       toast.error(
-        error?.data?.message || "Something went wrong while joining CodeBox"
+        error?.response?.data?.message || "Something went wrong while joining CodeBox"
       );
     }
   };

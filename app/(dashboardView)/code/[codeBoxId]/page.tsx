@@ -3,19 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import customFetch from "@/utils/axios";
 import socket from "@/socket";
-import { getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import debounce from "@/utils/debounce";
 import insertDecorationCSS from "@/utils/insertDecorationCSS";
 import { getMonacoLanguageId } from "@/utils/getMonacoLangId";
 import { useRouter } from "next/navigation";
 
-import {
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
 import { useTheme } from "next-themes";
 import EditorOutput from "@/components/EditorOutput";
@@ -38,11 +35,11 @@ interface IContentWidgetWithPosition extends monaco.editor.IContentWidget {
 }
 
 interface IContentWidgetObject {
-  [key: number]: IContentWidgetWithPosition;
+  [key: string]: IContentWidgetWithPosition;
 }
 
 interface Idecorations {
-  [key: number]: monaco.editor.IEditorDecorationsCollection;
+  [key: string]: monaco.editor.IEditorDecorationsCollection;
 }
 
 type Monaco = typeof monaco;
@@ -57,6 +54,7 @@ interface ICursroEventWithUser
 
 const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   const router = useRouter();
+  const { data: sessionData } = useSession();
   // const { id: userId, name, email, room_token, token } = data?.user || {};
   const [currFile, setFile] = useState<models.ICodeFile | null>(null);
   const currFileRef = useRef<models.ICodeFile | null>();
@@ -78,6 +76,8 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   const decorators = useRef<Idecorations>({});
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacorRef = useRef<Monaco | null>(null);
+
+  const isOwner: boolean = sessionData?.user.id === codeboxDetail?.userId;
 
   // TO FETCH CODEBOX DATA INITIALLY
   const fetchCodeBoxData = async () => {
@@ -104,7 +104,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   };
   // TO JOIN CODEBOX ROOM INITIALLY
   const joinCodeBoxRoom = async () => {
-    const session = await getSession();
     // console.log(session);
     const {
       id: userId,
@@ -112,7 +111,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       email,
       room_token,
       express_token,
-    } = session?.user || {};
+    } = sessionData?.user || {};
     console.log("join codebox room hook called");
     try {
       if (codeboxDetail?.roomId) {
@@ -162,12 +161,10 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     value: string | undefined,
     event: monaco.editor.IModelContentChangedEvent
   ) {
+    // console.log("ins func");
     if (!isSocket.current) {
       // console.log("here is the current model value:", event);
-      socket.emit("code-change", {
-        changeEvent: event.changes[0],
-        fileId: currFile?.language,
-      });
+      socket.emit("code-change", event.changes[0]);
       debouncedSave(value, currFile?.id);
     } else {
       isSocket.current = false;
@@ -258,16 +255,15 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   function changeWidgetPosition(e: ICursroEventWithUser) {
     // console.log("cursor change = ", e.fileId, currFile?.language);
     // remove previous widget
-    if (!editorRef.current) return;
 
-    if (!editorSidebarRef.current)
+    if (editorRef.current)
       editorRef.current.removeContentWidget(contentWidgets.current[e.userId]);
     // update widget position
     contentWidgets.current[e.userId].position.lineNumber =
       e.selection.endLineNumber;
     contentWidgets.current[e.userId].position.column = e.selection.endColumn;
     // add new widget
-    editorRef.current.addContentWidget(contentWidgets.current[e.userId]);
+    editorRef.current?.addContentWidget(contentWidgets.current[e.userId]);
   }
 
   useEffect(() => {
@@ -286,7 +282,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
           insertWidget(element);
         });
 
-        isSocket.current = true;
         setConnectedUsers(_connectedUsers);
       }
     );
@@ -299,16 +294,11 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       changeWidgetPosition(data);
     });
 
-    socket.on("code-change-received", ({ changeEvent, fileId }) => {
-      // console.log("code change received hook called", changeEvent, fileId);
+    socket.on("code-change-received", (changeEvent) => {
+      // console.log("code change received hook called", changeEvent);
 
       // execute change event
       // setModel(fileId);
-      // check if modal exist, if not then create a new one
-
-      let reqModel = monacorRef.current?.editor
-        .getModels()
-        .find((model) => model.uri.path === monaco.Uri.parse(fileId).path);
       // if (!reqModel) {
       //   // create new model
       //   console.log("creating a new model ...");
@@ -321,23 +311,17 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       // }
       // console.log("req model = ", reqModel);
       isSocket.current = true;
-      reqModel?.applyEdits([
+      // reqModel?.applyEdits(changeEvent);
+      editorRef.current?.executeEdits("other-user", [
         {
           range: changeEvent.range,
           text: changeEvent.text,
           forceMoveMarkers: true,
         },
       ]);
-      // editorRef.current?.executeEdits("other-user", [
-      //   {
-      //     range: changeEvent.range,
-      //     text: changeEvent.text,
-      //     forceMoveMarkers: true,
-      //   },
-      // ]);
     });
 
-    socket.on("user-disconnected", (userId: number) => {
+    socket.on("user-disconnected", (userId: string) => {
       // console.log("user disconnected hook called");
 
       // remove css class for cursor and selection
@@ -376,9 +360,9 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       });
 
       // destroy monaco models
-      monacorRef.current?.editor
-        .getModels()
-        .forEach((model) => model.dispose());
+      // monacorRef.current?.editor
+      //   .getModels()
+      //   .forEach((model) => model.dispose());
       editorRef.current?.dispose();
       // reset room_token
       // update({
@@ -429,6 +413,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
           connectedUsers={connectedUsers}
           handleSize={resizeEditorSidebar}
           codeBox={codeboxDetail}
+          isOwner={isOwner}
         />
       </ResizablePanel>
       <ResizablePanel defaultSize={100} className="z-10 flex">
@@ -457,7 +442,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
             <EditorOutput
               resizeEditorOuput={resizeEditorOuput}
               editorRef={editorRef}
-              language={currFile?.language}
+              language={currFile?.language!}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

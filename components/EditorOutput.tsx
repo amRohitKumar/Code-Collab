@@ -32,7 +32,7 @@ const HACKEREARTH_URL =
 type EditorFooterProps = {
   language: string;
   editorRef: any;
-  setLanguage: (lang: string) => void;
+  // setLanguage: (lang: string) => void;
   resizeEditorOuput: (size: number) => void;
 };
 

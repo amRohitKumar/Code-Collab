@@ -6,7 +6,7 @@ import * as monaco from "monaco-editor";
 import { toast } from "sonner";
 import customFetch from "@/utils/axios";
 import socket from "@/socket";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import debounce from "@/utils/debounce";
 import insertDecorationCSS from "@/utils/insertDecorationCSS";
 import { getMonacoLanguageId } from "@/utils/getMonacoLangId";
@@ -27,7 +27,6 @@ import { useTheme } from "next-themes";
 // bg-[#C0392B] border-[#C0392B] bg-[#1ABC9C] border-[#1ABC9C] bg-[#34495E] border-[#34495E] bg-[#F1C40F] border-[#F1C40F] bg-[#E67E22] border-[#E67E22] bg-[#2ECC71] border-[#2ECC71] bg-[#7F8C8D] border-[#7F8C8D] bg-[#FDC10A] border-[#FDC10A] bg-[#8E44AD] border-[#8E44AD] bg-[#3498DB] border-[#3498DB] bg-[#27AE60] border-[#27AE60] bg-[#9B59B6] border-[#9B59B6] bg-[#E74C3C] border-[#E74C3C] bg-[#F39C12] border-[#F39C12] bg-[#16A085] border-[#16A085] bg-[#2980B9] border-[#2980B9] bg-[#D35400] border-[#D35400] bg-[#8E44AD] border-[#8E44AD] bg-[#FF00FF] border-[#FF00FF] bg-[#00FFFF] border-[#00FFFF]
 // text-[#C0392B] text-[#1ABC9C] text-[#34495E] text-[#F1C40F] text-[#E67E22] text-[#2ECC71] text-[#7F8C8D] text-[#FDC10A] text-[#8E44AD] text-[#3498DB] text-[#27AE60] text-[#9B59B6] text-[#E74C3C] text-[#F39C12] text-[#16A085] text-[#2980B9] text-[#D35400] text-[#8E44AD] text-[#FF00FF] text-[#00FFFF]
 
-
 type PropsType = {
   codeBoxId: string;
 };
@@ -43,11 +42,11 @@ interface IContentWidgetWithPosition extends monaco.editor.IContentWidget {
 }
 
 interface IContentWidgetObject {
-  [key: number]: IContentWidgetWithPosition;
+  [key: string]: IContentWidgetWithPosition;
 }
 
 interface Idecorations {
-  [key: number]: monaco.editor.IEditorDecorationsCollection;
+  [key: string]: monaco.editor.IEditorDecorationsCollection;
 }
 
 type Monaco = typeof monaco;
@@ -62,6 +61,7 @@ interface ICursroEventWithUser
 
 const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   const router = useRouter();
+  const { data: sessionData } = useSession();
   // const { id: userId, name, email, room_token, token } = data?.user || {};
   const [currFile, setFile] = useState<models.ICodeFile | null>(null);
   const currFileRef = useRef<models.ICodeFile | null>();
@@ -89,6 +89,9 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   const decorators = useRef<Idecorations>({});
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacorRef = useRef<Monaco | null>(null);
+
+  //  is current user owner of the codebox
+  const isOwner: boolean = sessionData?.user.id === codeboxDetail?.userId;
 
   // TO FETCH CODEBOX DATA INITIALLY
   const fetchCodeBoxData = async () => {
@@ -237,8 +240,9 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     value: string | undefined,
     event: monaco.editor.IModelContentChangedEvent
   ) {
+    console.log("change occ");
     if (!isSocket.current) {
-      // console.log("here is the current model value:", event);
+      console.log("here is the current model value:", event.changes[0]);
       socket.emit("code-change", {
         changeEvent: event.changes[0],
         fileId: currFile?.language,
@@ -297,7 +301,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       e.selection.startColumn == e.selection.endColumn &&
       e.selection.startLineNumber == e.selection.endLineNumber &&
       monacorRef.current &&
-      e.fileId === currFile?.language
+      e.fileId === currFileRef.current?.language
     ) {
       selectionArray.push({
         range: new monacorRef.current.Range(
@@ -313,7 +317,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
           },
         },
       });
-    } else {
+    } else if (e.fileId === currFileRef.current?.language) {
       //if selection -
       selectionArray.push({
         range: e.selection,
@@ -342,10 +346,12 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     // remove previous widget
     editorRef.current.removeContentWidget(contentWidgets.current[e.userId]);
 
-    // update widget position
-    contentWidgets.current[e.userId].position.lineNumber =
-      e.selection.endLineNumber;
-    contentWidgets.current[e.userId].position.column = e.selection.endColumn;
+    if (currFileRef.current?.language === e.fileId) {
+      // update widget position
+      contentWidgets.current[e.userId].position.lineNumber =
+        e.selection.endLineNumber;
+      contentWidgets.current[e.userId].position.column = e.selection.endColumn;
+    }
     contentWidgets.current[e.userId].fileId =
       e.fileId === currFileRef.current?.language ? e.fileId : null;
 
@@ -369,13 +375,12 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
           insertWidget(element);
         });
 
-        isSocket.current = true;
         setConnectedUsers(_connectedUsers);
       }
     );
 
     socket.on("selection", function (data: ICursroEventWithUser) {
-      // console.log("selection hook called", data);
+      console.log("selection hook called", data);
 
       // change widget position and text selection
       changeSeleciton(data);
@@ -383,7 +388,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     });
 
     socket.on("code-change-received", ({ changeEvent, fileId }) => {
-      // console.log("code change received hook called", changeEvent, fileId);
+      console.log("code change received hook called", changeEvent, fileId);
 
       // execute change event
       // setModel(fileId);
@@ -420,7 +425,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       // ]);
     });
 
-    socket.on("user-disconnected", (userId: number) => {
+    socket.on("user-disconnected", (userId: string) => {
       // console.log("user disconnected hook called");
 
       // remove css class for cursor and selection
@@ -510,6 +515,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
               connectedUsers={connectedUsers}
               handleSize={resizeEditorSidebar}
               codeBox={codeboxDetail}
+              isOwner={isOwner}
             />
           </ResizablePanel>
           <ResizablePanel className="">

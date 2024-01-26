@@ -1,4 +1,4 @@
-function insertDecorationCSS(userId: number, color: string) {
+function insertDecorationCSS(userId: string, color: string) {
   var style = document.createElement("style");
   style.id = `user${userId}`;
   style.innerHTML = `
