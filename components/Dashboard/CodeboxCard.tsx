@@ -21,8 +21,8 @@ const CodeboxCard = ({
         <div className="text-xs relative h-[200px] overflow-clip  lg:mx-2 mt-2 rounded-md bg-none group-hover:scale-105 duration-500">
           {type === "CODE" ? (
             <Image
-              src={getLanguageImage(files[0].language)}
-              alt={files[0].language}
+              src={getLanguageImage(files?.at(0)?.language)}
+              alt={files?.at(0)?.language!}
               className="w-[175px] h-[175px] mx-auto my-auto opacity-90"
             />
           ) : (

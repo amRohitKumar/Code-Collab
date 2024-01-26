@@ -29,7 +29,7 @@ namespace models {
 
 namespace sockets {
   export interface ConnectUserType {
-    userId: number;
+    userId: string;
     name: string;
     email: string;
     roomId: string;

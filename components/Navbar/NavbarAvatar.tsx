@@ -8,15 +8,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
-const NavBarAvatar = () => (
+type AvatarProps = {
+  userId?: string;
+  userName?: string;
+};
+
+const NavBarAvatar = ({ userId, userName }: AvatarProps) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Avatar className="select-none">
         <AvatarImage
-          src="https://github.com/shadcn.png"
+          src={`https://api.dicebear.com/7.x/micah/svg?seed=${userId}`}
           className="w-10 rounded-full"
         />
-        <AvatarFallback>CN</AvatarFallback>
+        <AvatarFallback>
+          {userName?.charAt(0).toUpperCase() || "Hi"}
+        </AvatarFallback>
       </Avatar>
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56 mr-5">

@@ -6,9 +6,11 @@ import ModifiedLink from "../ModifiedLink";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/useModalState";
 import { ModeToggle } from "../DarkModeToggle";
+import { useSession } from "next-auth/react";
 import Logo from "../Logo";
 
 const Navbar = () => {
+  const data = useSession().data;
   const currPath = usePathname();
   const { onOpen } = useModal();
 
@@ -29,7 +31,7 @@ const Navbar = () => {
         <ModeToggle />
         <Button onClick={() => onOpen("createCodeBox")}>Create</Button>
         <Button onClick={() => onOpen("joinCodeBox")}>Join</Button>
-        <NavBarAvatar />
+        <NavBarAvatar userId={data?.user.id} userName={data?.user.name} />
       </div>
     </nav>
   );

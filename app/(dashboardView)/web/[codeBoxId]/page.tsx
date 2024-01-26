@@ -25,6 +25,8 @@ import { useTheme } from "next-themes";
 // audio call
 
 // bg-[#C0392B] border-[#C0392B] bg-[#1ABC9C] border-[#1ABC9C] bg-[#34495E] border-[#34495E] bg-[#F1C40F] border-[#F1C40F] bg-[#E67E22] border-[#E67E22] bg-[#2ECC71] border-[#2ECC71] bg-[#7F8C8D] border-[#7F8C8D] bg-[#FDC10A] border-[#FDC10A] bg-[#8E44AD] border-[#8E44AD] bg-[#3498DB] border-[#3498DB] bg-[#27AE60] border-[#27AE60] bg-[#9B59B6] border-[#9B59B6] bg-[#E74C3C] border-[#E74C3C] bg-[#F39C12] border-[#F39C12] bg-[#16A085] border-[#16A085] bg-[#2980B9] border-[#2980B9] bg-[#D35400] border-[#D35400] bg-[#8E44AD] border-[#8E44AD] bg-[#FF00FF] border-[#FF00FF] bg-[#00FFFF] border-[#00FFFF]
+// text-[#C0392B] text-[#1ABC9C] text-[#34495E] text-[#F1C40F] text-[#E67E22] text-[#2ECC71] text-[#7F8C8D] text-[#FDC10A] text-[#8E44AD] text-[#3498DB] text-[#27AE60] text-[#9B59B6] text-[#E74C3C] text-[#F39C12] text-[#16A085] text-[#2980B9] text-[#D35400] text-[#8E44AD] text-[#FF00FF] text-[#00FFFF]
+
 
 type PropsType = {
   codeBoxId: string;

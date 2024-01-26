@@ -28,7 +28,8 @@ const EditorSidebar = ({
   return (
     <div
       className={cn(
-        "flex flex-col p-2 items-start w-full h-full border-r-2 border-slate-200 dark:border-slate-500 border-solid overflow-hidden code-editor-height"
+        "flex flex-col py-2 items-start w-full h-full border-r-2 border-slate-200 dark:border-slate-500 border-solid overflow-hidden code-editor-height",
+        isOpen && "px-2"
       )}
     >
       <EditorSidebarRow
@@ -71,7 +72,7 @@ const EditorSidebar = ({
           </p>
         }
         onClick={() => {
-          console.log("share clicked");
+          // console.log("share clicked");
           onOpen("shareCodeBox", {
             roomId: codeBox?.roomId,
             password: codeBox?.password,
@@ -94,7 +95,7 @@ const EditorSidebar = ({
         }
       />
       <ScrollArea className="h-[85vh] w-full">
-        {connectedUsers.map(({ name, color }, idx) => (
+        {connectedUsers.map(({ name, color, userId }, idx) => (
           <EditorSidebarRow
             key={idx}
             isOpen={isOpen}
@@ -103,11 +104,12 @@ const EditorSidebar = ({
                 name={name}
                 color={color}
                 isOpen={isOpen}
-                className={cn("col-[1_/_span_1]", !isOpen && "col-span-4")}
+                userId={userId}
+                className={cn(`col-[1_/_span_1] border-2 border-[${color}] rounded-full p-1`, !isOpen && "col-span-4")}
               />
             }
             rightComponent={
-              <p className="text-sm col-[2_/_span_3] justify-self-start">
+              <p className={`text-sm col-[2_/_span_3] justify-self-start text-[${color}]`}>
                 {name}
               </p>
             }

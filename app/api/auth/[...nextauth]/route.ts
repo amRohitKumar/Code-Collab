@@ -7,6 +7,7 @@ import GoogleProvider from "next-auth/providers/google";
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth",
+    newUser: "/auth",
   },
   providers: [
     GithubProvider({

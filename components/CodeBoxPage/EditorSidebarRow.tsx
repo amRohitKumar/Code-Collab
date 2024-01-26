@@ -16,7 +16,7 @@ const EditorSidebarRow = ({
 }: Props) => {
   return (
     <div
-      className="w-full grid grid-cols-4 gap-4 justify-items-center mb-4 items-center"
+      className="w-full grid grid-cols-4 gap-4 justify-items-center mb-4 items-center px-2"
       {...otherProps}
     >
       {leftIcon}
