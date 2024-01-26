@@ -36,9 +36,17 @@ const getMonacoLanguageId = (language: string | undefined) => {
   return "plaintext";
 };
 
+const getHackerRankLanguage = (language: string | undefined) => {
+  if (!language) return "C";
+
+  const lang = languages.find((lang) => lang.name === language);
+  if (lang) return lang.value;
+  return "C";
+};
+
 const getLanguageColor = (language: string) => {
   const foundColor = languages.find((obj) => obj.name === language);
   return foundColor ? foundColor.color : "#fff";
 };
 
-export { languages, getMonacoLanguageId, getLanguageColor };
+export { languages, getMonacoLanguageId, getLanguageColor, getHackerRankLanguage };

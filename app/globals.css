@@ -154,7 +154,7 @@
     radial-gradient(at 33% 50%, hsla(222, 67%, 73%, 1) 0px, transparent 50%),
     radial-gradient(at 79% 53%, hsla(343, 68%, 79%, 1) 0px, transparent 50%);
   position: absolute;
-  height: 100%;
+  height: 500px;
   filter: blur(100px) saturate(150%);
   /* top: 80px; */
   opacity: 0.15;
@@ -182,4 +182,22 @@
 
 .editor-resizable-panel {
   height: calc(100dvh - 60px);
+}
+
+.code-editor-height {
+  max-height: calc(100dvh - 60px);
+}
+
+.progress-bar {
+  animation: 2s progress_animation infinite;
+}
+
+@keyframes progress_animation {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }

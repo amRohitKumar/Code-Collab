@@ -18,7 +18,7 @@ const CodeboxCard = ({
         // }
       >
         {/* TOP IMAGE */}
-        <div className="text-xs relative h-[200px] overflow-clip mx-2 mt-2 rounded-md bg-none group-hover:scale-105 duration-500">
+        <div className="text-xs relative h-[200px] overflow-clip  lg:mx-2 mt-2 rounded-md bg-none group-hover:scale-105 duration-500">
           {type === "CODE" ? (
             <Image
               src={getLanguageImage(files[0].language)}
@@ -41,12 +41,16 @@ const CodeboxCard = ({
             {name}
           </p>
           <div className="text-slate-400 text-md dark:text-white">
-            <p className="grid grid-cols-[40%,60%]">
-              <span className="font-semibold ">Updated At :&nbsp;</span>{" "}
+            <p className="grid grid-cols-2 lg:grid-cols-[40%,60%] ">
+              <span className="font-semibold whitespace-nowrap">
+                Updated At :&nbsp;
+              </span>
               {convertUTCToDateMonthYear(updatedAt)}
             </p>
-            <p className="grid grid-cols-[40%,60%]">
-              <span className="font-semibold">Created At :&nbsp;</span>{" "}
+            <p className="grid grid-cols-2 lg:grid-cols-[40%,60%]">
+              <span className="font-semibold whitespace-nowrap">
+                Created At :&nbsp;
+              </span>
               {convertUTCToDateMonthYear(createdAt)}
             </p>
           </div>

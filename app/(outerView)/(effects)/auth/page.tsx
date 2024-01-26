@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
+import Image from "next/image";
 import clsx from "clsx";
 import { ErrorMessage } from "@hookform/error-message";
 import { signIn } from "next-auth/react";
-import toast from "react-hot-toast";
-
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { AuthSocialGroup } from "@/components/SocialIcons";
 import { Button } from "@/components/ui/button";
@@ -52,17 +51,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="main flex flex-col items-center justify-center min-h-screen relative">
-      <div className="gradient" />
-      {/* <Image
-        src="/blob-scene-haikei.svg"
-        alt="Background"
-        layout="fill"
-        objectFit="cover"
-        className="absolute inset-0 -z-10 opacity-30"
-      /> */}
+    <div className="main flex flex-col h-full items-center justify-center relative">
       <div className="w-11/12 sm:w-7/12 xl:w-2/5 px-6 py-10 border-slate-200 border-2 rounded-3xl bg-slate-100 z-10  glassMorphism">
-        <h3 className="text-5xl font-semibold text-center ">
+        <h3 className="text-5xl font-semibold text-center text-primary">
           Login to Your Account
         </h3>
         <h6 className="text-xl text-center text-slate-400 mt-2">
@@ -79,7 +70,7 @@ const Auth = () => {
         </div>
         {/* EMAIL PASSWORD LOGIN */}
         <form
-          className="max-w-[400px] flex gap-4 justify-center mt-4 flex-col mx-auto"
+          className="max-w-[400px] flex gap-4 justify-center mt-4 flex-col mx-auto text-primary"
           onSubmit={handleSubmit(onSubmit)}
         >
           {variant === "REGISTER" && (

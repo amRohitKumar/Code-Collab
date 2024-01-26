@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useForm, FieldValues, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import customFetch from "@/utils/axios";
-import toast from "react-hot-toast";
+import { toast } from "sonner"
 import { useModal } from "@/hooks/useModalState";
 import { ErrorMessage } from "@hookform/error-message";
 
@@ -68,7 +68,7 @@ const JoinCodeBoxModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] border-0">
         <form onSubmit={handleSubmit(handleJoinCodeBox)}>
           <DialogHeader>
             <DialogTitle>Join Code Box</DialogTitle>

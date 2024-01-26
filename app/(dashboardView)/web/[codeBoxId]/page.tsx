@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import customFetch from "@/utils/axios";
 import socket from "@/socket";
-import { useSession, getSession } from "next-auth/react";
-import ShareRoom from "@/components/CodeBoxPage/ShareRoom";
+import { getSession } from "next-auth/react";
 import debounce from "@/utils/debounce";
 import insertDecorationCSS from "@/utils/insertDecorationCSS";
 import { getMonacoLanguageId } from "@/utils/getMonacoLangId";
@@ -20,7 +19,6 @@ import {
 } from "@/components/ui/resizable";
 import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
 import EditorTabs from "@/components/CodeBoxPage/EditorTabs";
-import { ImperativePanelHandle } from "react-resizable-panels";
 import sortByFileConvention from "@/utils/customFileSorting";
 import { useTheme } from "next-themes";
 
@@ -159,18 +157,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     }
   };
 
-  // TO COPY CODEBOX INFO
-  const copyContent = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        `Box Id: ${codeboxDetail?.roomId} \nPassword: ${codeboxDetail?.password}`
-      );
-      toast.success("Copied !");
-    } catch (err) {
-      console.error("Failed to copy: ", err);
-      toast.error("Failed to copy !");
-    }
-  };
   const getDocument = (html?: string, css?: string, js?: string) => {
     return `
     <html>
@@ -521,7 +507,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
             <EditorSidebar
               connectedUsers={connectedUsers}
               handleSize={resizeEditorSidebar}
-              codeboxName={codeboxDetail?.name}
+              codeBox={codeboxDetail}
             />
           </ResizablePanel>
           <ResizablePanel className="">

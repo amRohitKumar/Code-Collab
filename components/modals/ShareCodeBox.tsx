@@ -1,3 +1,5 @@
+import { toast } from "sonner"
+import { useModal } from "@/hooks/useModalState";
 import {
   Dialog,
   DialogContent,
@@ -5,40 +7,29 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { InputWithLabel } from "../InputWithLabel";
 import { Button } from "../ui/button";
-import { AiOutlineLink } from "react-icons/ai";
 
-type CodeBoxDetailType = {
-  id: number;
-  name: string;
-  password: string;
-  roomId: string;
-  code: string;
-  language: string;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-};
 
-type ShareRoomProps = {
-  codeboxDetail: CodeBoxDetailType | null;
-  copyContent: () => void;
-};
+const ShareCodeBoxModal = () => {
+  const { isOpen, onClose, type, data } = useModal();
+  const isModalOpen = isOpen && type === "shareCodeBox";
 
-const ShareRoom: React.FC<ShareRoomProps> = ({
-  codeboxDetail,
-  copyContent,
-}) => {
+  const copyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `Box Id: ${data?.roomId} \nPassword: ${data?.password}`
+      );
+      toast.success("Copied !");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+      toast.error("Failed to copy !");
+    }
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button className="ml-2 opacity-50">
-          <AiOutlineLink size="1.75em" />
-        </button>
-      </DialogTrigger>
+    <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Box Details</DialogTitle>
@@ -51,14 +42,14 @@ const ShareRoom: React.FC<ShareRoomProps> = ({
           labelFor="boxId"
           type="text"
           disabled
-          value={codeboxDetail?.roomId}
+          value={data?.roomId}
         />
         <InputWithLabel
           label="Password"
           labelFor="password"
           type="text"
           disabled
-          value={codeboxDetail?.password}
+          value={data?.password}
         />
         <DialogFooter>
           <Button type="button" onClick={copyContent}>
@@ -70,4 +61,4 @@ const ShareRoom: React.FC<ShareRoomProps> = ({
   );
 };
 
-export default ShareRoom;
+export default ShareCodeBoxModal;

@@ -3,20 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import toast from "react-hot-toast";
-import EditorFooter from "@/components/EditorFooter";
+import { toast } from "sonner"
 import customFetch from "@/utils/axios";
 import socket from "@/socket";
-import { useSession, getSession } from "next-auth/react";
-import ShareRoom from "@/components/CodeBoxPage/ShareRoom";
+import { getSession } from "next-auth/react";
 import debounce from "@/utils/debounce";
 import insertDecorationCSS from "@/utils/insertDecorationCSS";
 import { getMonacoLanguageId } from "@/utils/getMonacoLangId";
 import { useRouter } from "next/navigation";
 
+import {
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
+import { useTheme } from "next-themes";
+import EditorOutput from "@/components/EditorOutput";
+
 // audio call
 
-//border-[#2C3E50] bg-[#2C3E50] border-[#3498DB] bg-[#3498DB] border-[#27AE60] bg-[#27AE60] border-[#9B59B6] bg-[#9B59B6] border-[#E74C3C] bg-[#E74C3C] border-[#F39C12] bg-[#F39C12] border-[#16A085] bg-[#16A085] border-[#2980B9] bg-[#2980B9] border-[#D35400] bg-[#D35400] border-[#8E44AD] bg-[#8E44AD]
+// bg-[#C0392B] border-[#C0392B] bg-[#1ABC9C] border-[#1ABC9C] bg-[#34495E] border-[#34495E] bg-[#F1C40F] border-[#F1C40F] bg-[#E67E22] border-[#E67E22] bg-[#2ECC71] border-[#2ECC71] bg-[#7F8C8D] border-[#7F8C8D] bg-[#FDC10A] border-[#FDC10A] bg-[#8E44AD] border-[#8E44AD] bg-[#3498DB] border-[#3498DB] bg-[#27AE60] border-[#27AE60] bg-[#9B59B6] border-[#9B59B6] bg-[#E74C3C] border-[#E74C3C] bg-[#F39C12] border-[#F39C12] bg-[#16A085] border-[#16A085] bg-[#2980B9] border-[#2980B9] bg-[#D35400] border-[#D35400] bg-[#8E44AD] border-[#8E44AD] bg-[#FF00FF] border-[#FF00FF] bg-[#00FFFF] border-[#00FFFF]
 
 type PropsType = {
   codeBoxId: string;
@@ -41,48 +47,31 @@ interface Idecorations {
 
 type Monaco = typeof monaco;
 
-type CodeBoxDetailType = {
-  id: number;
-  name: string;
-  password: string;
-  roomId: string;
-  code: string;
-  language: string;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type ConnectUserType = {
-  userId: number;
-  name: string;
-  email: string;
-  roomId: string;
-  color: string;
-  boxId: number;
-};
-
 interface ICursroEventWithUser
   extends monaco.editor.ICursorSelectionChangedEvent {
   userId: number;
   name: string;
   color: string;
+  fileId: string | null;
 }
 
 const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
-  const { data, update } = useSession();
-  console.log(data);
   const router = useRouter();
   // const { id: userId, name, email, room_token, token } = data?.user || {};
-  const [language, setLanguage] = useState("JAVASCRIPT_NODE");
-
+  const [currFile, setFile] = useState<models.ICodeFile | null>(null);
+  const currFileRef = useRef<models.ICodeFile | null>();
+  currFileRef.current = currFile;
   // to store connected users
-  const [connectedUsers, setConnectedUsers] = useState<ConnectUserType[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<
+    sockets.ConnectUserType[]
+  >([]);
 
   // to store codebox detail
-  const [codeboxDetail, setCodeboxDetail] = useState<CodeBoxDetailType | null>(
+  const [codeboxDetail, setCodeboxDetail] = useState<models.ICodeBox | null>(
     null
   );
+
+  const { theme } = useTheme();
 
   const isSocket = useRef(false); // to resolve conflict between socket and editor change event
   const contentWidgets = useRef<IContentWidgetObject>({}); // to store user name tag
@@ -90,33 +79,20 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacorRef = useRef<Monaco | null>(null);
 
-  // change the language of the editor
-  const handleModelLanguageChange = async (newLanguage: string) => {
-    const currModal = editorRef.current?.getModel();
-    console.log(newLanguage, language);
-    console.log(editorRef.current, currModal);
-    if (!currModal || newLanguage === language) return;
-    console.log(newLanguage, language);
-    setLanguage(newLanguage);
-    monaco.editor.setModelLanguage(currModal, getMonacoLanguageId(newLanguage));
-  };
-
-  const updateLanguageToDB = async (newLanguage: string) => {
-    try {
-      await customFetch.put(`/codebox/changelanguage/${codeBoxId}`, {
-        data: newLanguage,
-      });
-    } catch (error) {
-      console.log("error while updating language to db = ", error);
-    }
-  };
-
   // TO FETCH CODEBOX DATA INITIALLY
   const fetchCodeBoxData = async () => {
     try {
-      const resp = await customFetch.get(`/codebox/${codeBoxId}`);
-      handleModelLanguageChange(resp.data.language);
-      setCodeboxDetail(resp.data);
+      const {
+        codeBox,
+        codeFiles,
+      }: { codeBox: models.ICodeBox; codeFiles: models.ICodeFile[] } = (
+        await customFetch.get(`/codebox/${codeBoxId}`)
+      ).data;
+      console.log("code file fetched = ", codeFiles);
+      setCodeboxDetail(codeBox);
+      setFile(codeFiles[0]);
+      isSocket.current = true;
+      editorRef.current?.setValue(codeFiles[0].code || "Enter code here ");
     } catch (error: any) {
       console.log("error while fethcing codebox info = ", error);
       toast.error(
@@ -126,16 +102,21 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       );
     }
   };
-
   // TO JOIN CODEBOX ROOM INITIALLY
   const joinCodeBoxRoom = async () => {
     const session = await getSession();
     // console.log(session);
-    const { id: userId, name, email, room_token, express_token } = session?.user || {};
-    // console.log("join codebox room hook called");
+    const {
+      id: userId,
+      name,
+      email,
+      room_token,
+      express_token,
+    } = session?.user || {};
+    console.log("join codebox room hook called");
     try {
       if (codeboxDetail?.roomId) {
-        // console.log("codeboxid = ", codeBoxId);
+        console.log("codeboxid = ", codeBoxId);
         socket.auth = {
           boxId: codeBoxId,
           userId: userId,
@@ -153,37 +134,23 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     }
   };
 
-  // TO COPY CODEBOX INFO
-  const copyContent = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        `Box Id: ${codeboxDetail?.roomId} \nPassword: ${codeboxDetail?.password}`
-      );
-      toast.success("Copied !");
-    } catch (err) {
-      console.error("Failed to copy: ", err);
-      toast.error("Failed to copy !");
-    }
-  };
-
-  function handleEditorDidMount(
+  async function handleEditorDidMount(
     editor: monaco.editor.IStandaloneCodeEditor,
     monaco: Monaco
   ) {
     editorRef.current = editor;
-    // console.log("mounted = ", editorRef.current);
     monacorRef.current = monaco;
-    fetchCodeBoxData();
+    await fetchCodeBoxData();
     editorRef.current?.onDidChangeCursorSelection(
       (e: monaco.editor.ICursorSelectionChangedEvent) => {
-        socket.emit("selection", e);
+        socket.emit("selection", { ...e, fileId: currFile?.language || null });
       }
     );
   }
 
-  const saveToDatabase = async (value: string) => {
+  const saveToDatabase = async (value: string, fileId: string) => {
     try {
-      await customFetch.put(`/codebox/${codeBoxId}`, { data: value });
+      await customFetch.put(`/codebox/${codeBoxId}`, { data: value, fileId });
     } catch (error) {
       console.log("error while saving to db = ", error);
     }
@@ -197,8 +164,11 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
   ) {
     if (!isSocket.current) {
       // console.log("here is the current model value:", event);
-      socket.emit("code-change", event.changes[0]);
-      debouncedSave(value);
+      socket.emit("code-change", {
+        changeEvent: event.changes[0],
+        fileId: currFile?.language,
+      });
+      debouncedSave(value, currFile?.id);
     } else {
       isSocket.current = false;
     }
@@ -206,7 +176,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
 
   // ADD WIDGET
 
-  function insertWidget(user: ConnectUserType) {
+  function insertWidget(user: sockets.ConnectUserType) {
     contentWidgets.current[user.userId] = {
       allowEditorOverflow: true,
       position: {
@@ -226,6 +196,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
         el.style.padding = "1px 4px";
         el.style.borderRadius = "5px";
         el.style.border = "1px solid white";
+        el.style.zIndex = "99999";
         return el;
       },
       getPosition: function () {
@@ -242,6 +213,8 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
 
   function changeSeleciton(e: ICursroEventWithUser) {
     var selectionArray = [];
+    // console.log("curr file", currFile);
+    // console.log("changing selection = ", e.fileId, currFile?.language);
     if (
       e.selection.startColumn == e.selection.endColumn &&
       e.selection.startLineNumber == e.selection.endLineNumber &&
@@ -283,31 +256,26 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     }
   }
   function changeWidgetPosition(e: ICursroEventWithUser) {
+    // console.log("cursor change = ", e.fileId, currFile?.language);
+    // remove previous widget
     if (!editorRef.current) return;
 
-    // remove previous widget
-    editorRef.current.removeContentWidget(contentWidgets.current[e.userId]);
-
+    if (!editorSidebarRef.current)
+      editorRef.current.removeContentWidget(contentWidgets.current[e.userId]);
     // update widget position
     contentWidgets.current[e.userId].position.lineNumber =
       e.selection.endLineNumber;
     contentWidgets.current[e.userId].position.column = e.selection.endColumn;
-
     // add new widget
     editorRef.current.addContentWidget(contentWidgets.current[e.userId]);
   }
 
-  // useEffect(() => {
-  //   if (editorRef.current) {
-  //     fetchCodeBoxData();
-  //   }
-  // }, [editorRef.current?._id]);
-
   useEffect(() => {
+    if (!codeboxDetail?.id || !editorRef.current) return;
     joinCodeBoxRoom();
     socket.on(
       "connected-users",
-      (_connectedUsers: ConnectUserType[], currentValue: string) => {
+      (_connectedUsers: sockets.ConnectUserType[]) => {
         // console.log("connected users hook called");
 
         _connectedUsers.forEach((element) => {
@@ -319,7 +287,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
         });
 
         isSocket.current = true;
-        editorRef.current?.setValue(currentValue);
         setConnectedUsers(_connectedUsers);
       }
     );
@@ -332,28 +299,42 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       changeWidgetPosition(data);
     });
 
-    socket.on(
-      "code-change-received",
-      (changeEvent: monaco.editor.IModelContentChange) => {
-        // console.log("code change received hook called", changeEvent);
+    socket.on("code-change-received", ({ changeEvent, fileId }) => {
+      // console.log("code change received hook called", changeEvent, fileId);
 
-        // execute change event
-        isSocket.current = true;
-        editorRef.current?.executeEdits("other-user", [
-          {
-            range: changeEvent.range,
-            text: changeEvent.text,
-            forceMoveMarkers: true,
-          },
-        ]);
-      }
-    );
+      // execute change event
+      // setModel(fileId);
+      // check if modal exist, if not then create a new one
 
-    socket.on("change-language", (newLanguage: string) => {
-      console.log("change language hook called", newLanguage);
-
-      // change language of editor
-      handleModelLanguageChange(newLanguage);
+      let reqModel = monacorRef.current?.editor
+        .getModels()
+        .find((model) => model.uri.path === monaco.Uri.parse(fileId).path);
+      // if (!reqModel) {
+      //   // create new model
+      //   console.log("creating a new model ...");
+      //   const codeFile = codefileDetail.find((file) => file.id === fileId);
+      //   reqModel = monacorRef.current?.editor.createModel(
+      //     codeFile?.code || "",
+      //     codeFile?.language,
+      //     monaco.Uri.parse(codeFile?.id!)
+      //   );
+      // }
+      // console.log("req model = ", reqModel);
+      isSocket.current = true;
+      reqModel?.applyEdits([
+        {
+          range: changeEvent.range,
+          text: changeEvent.text,
+          forceMoveMarkers: true,
+        },
+      ]);
+      // editorRef.current?.executeEdits("other-user", [
+      //   {
+      //     range: changeEvent.range,
+      //     text: changeEvent.text,
+      //     forceMoveMarkers: true,
+      //   },
+      // ]);
     });
 
     socket.on("user-disconnected", (userId: number) => {
@@ -381,7 +362,6 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       socket.off("code-change-received");
       socket.off("user-disconnected");
       socket.off("selection");
-      socket.off("change-language");
       socket.off("connect_error");
       socket.disconnect();
 
@@ -395,6 +375,11 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
         document.getElementById(`user${user.userId}`)?.remove();
       });
 
+      // destroy monaco models
+      monacorRef.current?.editor
+        .getModels()
+        .forEach((model) => model.dispose());
+      editorRef.current?.dispose();
       // reset room_token
       // update({
       //   ...data,
@@ -404,55 +389,80 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
       //   },
       // });
     };
-  }, [codeboxDetail?.roomId]);
+    // should be called after fetchCodeboxData function
+  }, [codeboxDetail?.id, editorRef.current]);
+
+  const editorSidebarRef = useRef(),
+    editorOutputRef = useRef();
+  const resizeEditorSidebar = (finalWidth: number) => {
+    const currentSize = editorSidebarRef.current?.getSize();
+    // console.log("size = ", currentSize);
+    if (currentSize === finalWidth) editorSidebarRef.current?.resize(3);
+    else editorSidebarRef.current?.resize(finalWidth);
+  };
+  const resizeEditorOuput = (finalWidth: number) => {
+    console.log("clicked");
+    const currentSize = editorOutputRef.current?.getSize();
+    // console.log("size = ", currentSize);
+    if (currentSize === finalWidth) editorOutputRef.current?.resize(8);
+    else editorOutputRef.current?.resize(finalWidth);
+  };
+
+  // let htmlContent = monacorRef.current?.editor.getModels();
+  // console.log("models = ", htmlContent);
+
+  // getHTMLString();
 
   return (
-    <div className="flex items-start flex-col-reverse md:flex-row h-full bg-violet-100 overflow-y-clip">
-      {/* LEFT CONTAINER (CODE BOX) */}
-      <div className="h-full md:sticky md:top-[50px] bg-slate-500 w-full md:w-3/4">
-        <Editor
-          height="calc(100dvh - 110px)" // 50 + 60
-          width="100%"
-          defaultLanguage={getMonacoLanguageId(language) || "javascript"}
-          defaultValue={codeboxDetail?.code || "// Loading ..."}
-          onMount={handleEditorDidMount}
-          onChange={handleEditorChange}
-          theme="vs-dark"
-          className="mt-1"
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="h-full overflow-y-clip"
+    >
+      <ResizablePanel
+        defaultSize={5}
+        minSize={5}
+        maxSize={20}
+        ref={editorSidebarRef}
+        className="transition-all duration-200 ease-linear"
+      >
+        <EditorSidebar
+          connectedUsers={connectedUsers}
+          handleSize={resizeEditorSidebar}
+          codeBox={codeboxDetail}
         />
-        <EditorFooter
-          editorRef={editorRef}
-          language={language}
-          setLanguage={(e) => {
-            handleModelLanguageChange(e);
-            updateLanguageToDB(e);
-            socket.emit("change-language", e);
-          }}
-        />
-      </div>
-      {/* RIGHT CONTAINER (INFO) */}
-      <div className="px-3 py-2 w-full h-full md:w-1/4">
-        <div className="flex justify-center items-center">
-          <h4 className="text-3xl font-bold text-center">
-            {codeboxDetail?.name || "Loading ..."}
-          </h4>
-          <ShareRoom codeboxDetail={codeboxDetail} copyContent={copyContent} />
-        </div>
-        <div className="h-full  mt-4 rounded-md px-4 py-4 ">
-          {connectedUsers.map((user) => (
-            <div
-              key={user.userId}
-              className="flex items-center font-semibold bg-slate-100 rounded-md my-2 px-2 py-2"
-            >
-              <div className={`rounded-full w-4 h-4 bg-[${user.color}] mr-2`} />
-              <div>
-                {user.name} - {user.email}
+      </ResizablePanel>
+      <ResizablePanel defaultSize={100} className="z-10 flex">
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel defaultSize={92} className="overflow-y-clip">
+            <div className="flex h-content md:sticky bg-slate-200 w-full">
+              <div className="h-full w-full">
+                <Editor
+                  height="calc(100dvh - 60px)" // 60 navbar + 40 tab
+                  width="100%"
+                  defaultLanguage="C"
+                  language={getMonacoLanguageId(currFile?.language)}
+                  defaultValue="Loading ..."
+                  onMount={handleEditorDidMount}
+                  onChange={handleEditorChange}
+                  theme={theme === "dark" ? "vs-dark" : "light"}
+                />
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          </ResizablePanel>
+          <ResizablePanel
+            defaultSize={8}
+            ref={editorOutputRef}
+            className="transition-all duration-300 ease-linear overflow-y-clip"
+          >
+            <EditorOutput
+              resizeEditorOuput={resizeEditorOuput}
+              editorRef={editorRef}
+              language={currFile?.language}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 };
 

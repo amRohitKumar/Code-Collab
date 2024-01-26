@@ -2,7 +2,7 @@
 
 import CreateCodeBoxModal from "@/components/modals/CreateCodeBox";
 import JoinCodeBoxModal from "@/components/modals/JoinCodeBox";
-import ShowCodeBoxModal from "@/components/modals/ShowCodeBox";
+import ShareCodeBoxModal from "@/components/modals/ShareCodeBox";
 import { useEffect, useState } from "react";
 
 export const ModalProvider = () => {
@@ -18,7 +18,7 @@ export const ModalProvider = () => {
     <>
       <CreateCodeBoxModal />
       <JoinCodeBoxModal />
-      {/* <ShowCodeBoxModal /> */}
+      <ShareCodeBoxModal />
     </>
   );
 };

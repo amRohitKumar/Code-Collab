@@ -1,22 +1,10 @@
 import Image from "next/image";
-import Nav from "@/components/Home/Nav";
 import FeatureBox from "@/components/Home/Feature";
 import "@/utils/HomeObserver";
 
 export default function Home() {
   return (
     <main className="main flex min-h-screen flex-col items-center justify-start px-10 sm:px-20 relative z-0 overflow-x-clip">
-      <Nav />
-      <div className="gradient" />
-      <div className="hidden dark:block absolute w-full h-full -z-10">
-        <Image
-          src="/space3.png"
-          alt="Decoration"
-          layout="fill"
-          objectFit="cover"
-          className="opacity-10"
-        />
-      </div>
       <h1
         id="home-heading"
         className="mt-2 text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl text-center dark:text-white"

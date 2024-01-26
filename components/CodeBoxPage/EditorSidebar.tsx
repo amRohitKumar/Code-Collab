@@ -1,29 +1,34 @@
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { AiOutlineMenu } from "react-icons/ai";
-import { PersonIcon, HamburgerMenuIcon } from "@radix-ui/react-icons";
+import {
+  PersonIcon,
+  HamburgerMenuIcon,
+  Share1Icon,
+} from "@radix-ui/react-icons";
 import EditorSidebarUserIcon from "./EditorSidebarUsericon";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditorSidebarRow from "./EditorSidebarRow";
 import { Separator } from "@/components/ui/separator";
+import { useModal } from "@/hooks/useModalState";
 
 type EditorSidebarProps = {
   connectedUsers: sockets.ConnectUserType[];
-  codeboxName?: string;
+  codeBox: models.ICodeBox | null;
   handleSize: (num: number) => void;
 };
 
 const EditorSidebar = ({
   connectedUsers,
   handleSize,
-  codeboxName,
+  codeBox,
 }: EditorSidebarProps) => {
+  const { onOpen } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   // console.log("ccc = ", connectedUsers);
   return (
     <div
       className={cn(
-        "flex flex-col p-2 items-start w-full h-full dark:bg-[#1e1e1e] border-r-2 border-slate-200 dark:border-slate-500 border-solid overflow-hidden"
+        "flex flex-col p-2 items-start w-full h-full border-r-2 border-slate-200 dark:border-slate-500 border-solid overflow-hidden code-editor-height"
       )}
     >
       <EditorSidebarRow
@@ -37,16 +42,41 @@ const EditorSidebar = ({
               !isOpen && "col-span-4"
             )}
             onClick={() => {
-              handleSize(20);
+              handleSize(18);
               setIsOpen((prev) => !prev);
             }}
           />
         }
         rightComponent={
           <p className="text-md col-[2_/_span_3] capitalize justify-self-start">
-            {codeboxName}
+            {codeBox?.name}
           </p>
         }
+      />
+      <EditorSidebarRow
+        isOpen={isOpen}
+        leftIcon={
+          <Share1Icon
+            width={25}
+            height={25}
+            className={cn(
+              "cursor-pointer col-[1_/_span_1]",
+              !isOpen && "col-span-4"
+            )}
+          />
+        }
+        rightComponent={
+          <p className="text-md col-[2_/_span_3] capitalize justify-self-start">
+            Share Codebox
+          </p>
+        }
+        onClick={() => {
+          console.log("share clicked");
+          onOpen("shareCodeBox", {
+            roomId: codeBox?.roomId,
+            password: codeBox?.password,
+          });
+        }}
       />
       <EditorSidebarRow
         isOpen={isOpen}
