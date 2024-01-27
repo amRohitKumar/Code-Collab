@@ -202,11 +202,39 @@
   }
 }
 
-@keyframes fade-in{
-  0%{
+@keyframes fade-in {
+  0% {
     opacity: 0;
   }
-  100%{
+
+  100% {
     opacity: 100%;
+  }
+}
+
+
+.contribute-first-row {
+  animation: 13s home-animation linear infinite;
+
+}
+
+.contribute-first-row span {
+  display: inline-block;
+}
+
+.contribute-last-row {
+  animation: 13s home-animation linear infinite reverse;
+}
+
+.contribute-last-row span {
+  display: inline-block;
+}
+
+@keyframes home-animation {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
   }
 }

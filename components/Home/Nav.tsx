@@ -23,7 +23,7 @@ const Nav = () => {
   }, []);
 
   return (
-    <nav className="flex justify-between items-center w-full z-10 sticky top-0 py-4 px-8">
+    <nav className="flex justify-between items-center w-full z-10 sticky top-0 py-4 px-8 backdrop-blur-md">
       <Link href="/" className="flex gap-2 flex-center">
         <Logo />
       </Link>

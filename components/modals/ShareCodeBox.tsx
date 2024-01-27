@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { InputWithLabel } from "../InputWithLabel";
 import { Button } from "../ui/button";
-import axios from "@/utils/axios";
+import customFetch from "@/utils/axios";
 import { useState } from "react";
 
 const ShareCodeBoxModal = () => {
@@ -33,7 +33,7 @@ const ShareCodeBoxModal = () => {
 
   const updatePassword = async () => {
     try {
-      await axios.patch(`/codebox/${data?.codeboxId}/update-password`, {
+      await customFetch.patch(`/codebox/${data?.codeboxId}/update-password`, {
         password,
       });
       onClose();

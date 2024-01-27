@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { languages } from "@/utils/getMonacoLangId";
 import { Button } from "./ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -11,20 +10,8 @@ import {
   GearIcon,
 } from "@radix-ui/react-icons";
 import { getHackerRankLanguage } from "@/utils/getMonacoLangId";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import axios from "axios";
-import { AiFillCaretUp } from "react-icons/ai";
-import { AiFillCaretDown } from "react-icons/ai";
 import { cn } from "@/lib/utils";
-import { Input } from "./ui/input";
 
 const HACKEREARTH_URL =
   "https://api.hackerearth.com/v4/partner/code-evaluation/submissions/";

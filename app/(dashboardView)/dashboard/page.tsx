@@ -7,7 +7,8 @@ import serverAuth from "@/utils/auth";
 const getData = async (userId: string, token: string) => {
   try {
     const { data } = await axios.get(
-      `http://localhost:8000/dashboard/${userId}`,
+      // `http://localhost:8000/dashboard/${userId}`,
+      `https://code-collab-server-qeff.onrender.com/dashboard/${userId}`,
       {
         headers: {
           "Content-Type": "application/json",
