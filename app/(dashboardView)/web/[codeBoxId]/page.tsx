@@ -21,6 +21,7 @@ import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
 import EditorTabs from "@/components/CodeBoxPage/EditorTabs";
 import sortByFileConvention from "@/utils/customFileSorting";
 import { useTheme } from "next-themes";
+import { ImperativePanelHandle } from "react-resizable-panels";
 
 // audio call
 
@@ -480,7 +481,7 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     // should be called after fetchCodeboxData function
   }, [codeboxDetail?.id, editorRef.current]);
 
-  const editorSidebarRef = useRef();
+  const editorSidebarRef = useRef<ImperativePanelHandle>(null);
   const resizeEditorSidebar = (finalWidth: number) => {
     const currentSize = editorSidebarRef.current?.getSize();
     console.log("size = ", currentSize);

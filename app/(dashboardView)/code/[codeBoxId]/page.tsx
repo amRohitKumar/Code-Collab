@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Ref } from "react";
 import Editor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import EditorSidebar from "@/components/CodeBoxPage/EditorSidebar";
 import { useTheme } from "next-themes";
 import EditorOutput from "@/components/EditorOutput";
+import { ImperativePanelHandle } from "react-resizable-panels";
 
 // audio call
 
@@ -376,8 +377,9 @@ const Page = ({ params: { codeBoxId } }: { params: PropsType }) => {
     // should be called after fetchCodeboxData function
   }, [codeboxDetail?.id, editorRef.current]);
 
-  const editorSidebarRef = useRef(),
-    editorOutputRef = useRef();
+  const editorSidebarRef = useRef<ImperativePanelHandle>(null),
+    editorOutputRef = useRef<ImperativePanelHandle>(null);
+
   const resizeEditorSidebar = (finalWidth: number) => {
     const currentSize = editorSidebarRef.current?.getSize();
     // console.log("size = ", currentSize);
