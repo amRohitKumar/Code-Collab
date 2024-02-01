@@ -116,7 +116,7 @@ export default function Home() {
         <a
           href="https://github.com/amRohitKumar/Code-Collab"
           target="_blank"
-          className="flex flex-nowrap justify-center my-4"
+          className="flex flex-nowrap justify-center my-4 relative z-50"
         >
           <span>CONTRIBUTE ON</span>
           <span>
