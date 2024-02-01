@@ -71,7 +71,7 @@ export default function Home() {
           className={cn(idx % 2 && "md:flex-row-reverse")}
         />
       ))}
-      <div className="my-4 text-8xl font-extrabold bg-fuchsia-900 text-white overflow-hidden whitespace-nowrap py-12">
+      <div className="my-4 text-8xl font-extrabold bg-fuchsia-900 dark:bg-transparent text-white overflow-hidden whitespace-nowrap py-12">
         <h4 className={clsx("text-slate-300 mb-10 z-50 text-center text-3xl")}>
           Tech Stack :
         </h4>
@@ -113,16 +113,16 @@ export default function Home() {
             </span>
           </div>
         </div>
-        <div
-          // href="https://github.com"
-          // target="_blank"
+        <a
+          href="https://github.com/amRohitKumar/Code-Collab"
+          target="_blank"
           className="flex flex-nowrap justify-center my-4"
         >
           <span>CONTRIBUTE ON</span>
           <span>
             {<GitHubLogoIcon width={100} height={100} className="mx-8" />}
           </span>
-        </div>
+        </a>
         <div className="w-full mt-16 overflow-hidden contribute-last-row">
           <div className="inline-block whitespace-nowrap overflow-hidden">
             <span> PostgreSQL </span>

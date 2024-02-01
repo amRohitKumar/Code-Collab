@@ -1,11 +1,10 @@
 import axios from "axios";
 import { getSession } from "next-auth/react";
+import { SERVER_URL } from "@/backendUrl";
 
 const customFetch = () => {
-  const baseUrl = "https://code-collab-server-qeff.onrender.com";
-  // const baseUrl = "http://localhost:8080";
   const axiosInstance = axios.create({
-    baseURL: baseUrl,
+    baseURL: SERVER_URL,
     headers: {
       "content-type": "application/json",
     },

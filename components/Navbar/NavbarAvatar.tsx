@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { signOut } from "next-auth/react";
 
 type AvatarProps = {
   userId?: string;
@@ -29,7 +30,7 @@ const NavBarAvatar = ({ userId, userName }: AvatarProps) => (
     <DropdownMenuContent className="w-56 mr-5">
       <DropdownMenuLabel>Profile</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>Log Out</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => signOut()}>Log Out</DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
 );

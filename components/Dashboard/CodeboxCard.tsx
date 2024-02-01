@@ -9,6 +9,7 @@ const CodeboxCard = ({
 }: {
   children: models.ICodeBox;
 }) => {
+  // console.log("type = ", type);
   return (
     <Link href={`/${type === "CODE" ? "code" : "web"}/${id}`} prefetch={false}>
       <div

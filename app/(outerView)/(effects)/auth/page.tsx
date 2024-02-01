@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
-import Image from "next/image";
 import clsx from "clsx";
 import { ErrorMessage } from "@hookform/error-message";
 import { signIn } from "next-auth/react";
@@ -27,7 +26,7 @@ const Auth = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FieldValues>({
     defaultValues: {
       name: "",
@@ -37,6 +36,7 @@ const Auth = () => {
   });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    console.log(data);
     try {
       if (variant === "LOGIN") {
         await signIn("credentials", { ...data, callbackUrl: "/dashboard" });
@@ -89,7 +89,7 @@ const Auth = () => {
               <ErrorMessage
                 errors={errors}
                 name="name"
-                render={({ message }) => <FormErrorMessage message={message} />}
+                render={({ message }) => <FormErrorMessage message={message} className="col-span-4" />}
               />
             </>
           )}
@@ -120,9 +120,11 @@ const Auth = () => {
           <ErrorMessage
             errors={errors}
             name="password"
-            render={({ message }) => <FormErrorMessage message={message} />}
+            render={({ message }) => <FormErrorMessage message={message} className="col-span-4" />}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit">
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
         </form>
         <div className="mt-4 text-center text-gray-500 w-full">
           {variant === "LOGIN" ? (
